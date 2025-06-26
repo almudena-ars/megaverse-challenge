@@ -1,38 +1,54 @@
 import requests
 import time
+
+from api_calls import post_with_retry
 from constants import HOST, CANDIDATE_ID, HEADERS, RETRY_AFTER_DELAY
 
 
 def create_polyanet(row, column):
-    """
-    Creates a Polyanet at the specified row and column using the Crossmint API.
-    Handles various HTTP status codes and provides error messages.
-    :param row: int, the row position
-    :param column: int, the column position
-    """
     url = f"{HOST}/polyanets"
     payload = {
         "row": int(row),
         "column": int(column),
         "candidateId": CANDIDATE_ID
     }
-    try:
-        response = requests.post(url, json=payload, headers=HEADERS)
-        response.raise_for_status()
-        print(f"Created polyanet at ({row}, {column})")
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        if hasattr(e, 'response') and e.response is not None:
-            if e.response.status_code == 429:
-                print(f"Rate limited. Retrying after {RETRY_AFTER_DELAY} seconds.")
-                time.sleep(int(RETRY_AFTER_DELAY))
-                return create_polyanet(row, column)
-            else:
-                print(f"Unable to create polyanet at ({row}, {column}):", e)
-        else:
-            print(f"An error ocurred:", e)
-    except requests.exceptions.RequestException as e:
-        print(f"An error ocurred:", e)
+    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+
+
+def create_soloon(row, column, color):
+    """
+    Creates a Soloon at the specified row and column with the given color.
+    :param row: int, the row position
+    :param column: int, the column position
+    :param color: str, one of "blue", "red", "purple", "white"
+    :return: dict or None, the API response
+    """
+    url = f"{HOST}/soloons"
+    payload = {
+        "row": int(row),
+        "column": int(column),
+        "color": color,
+        "candidateId": CANDIDATE_ID
+    }
+    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+
+
+def create_cometh(row, column, direction):
+    """
+    Creates a Cometh at the specified row and column with the given direction.
+    :param row: int, the row position
+    :param column: int, the column position
+    :param direction: str, one of "up", "down", "right", "left"
+    :return: dict or None, the API response
+    """
+    url = f"{HOST}/comeths"
+    payload = {
+        "row": int(row),
+        "column": int(column),
+        "direction": direction,
+        "candidateId": CANDIDATE_ID
+    }
+    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def delete_polyanets(row, column):
