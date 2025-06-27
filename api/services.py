@@ -1,17 +1,18 @@
+# api/services.py
 import requests
 
 from api.api_calls import request_with_retry
-from constants import HOST, CANDIDATE_ID, HEADERS, RETRY_AFTER_DELAY
+from utils.config_parser import BASE_URL, CANDIDATE_ID, RETRY_AFTER_DELAY
 
 
 def create_polyanet(row, column):
-    url = f"{HOST}/polyanets"
+    url = f"{BASE_URL}/polyanets"
     payload = {
         "row": int(row),
         "column": int(column),
         "candidateId": CANDIDATE_ID
     }
-    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def create_soloon(row, column, color):
@@ -22,14 +23,14 @@ def create_soloon(row, column, color):
     :param color: str, one of "blue", "red", "purple", "white"
     :return: dict or None, the API response
     """
-    url = f"{HOST}/soloons"
+    url = f"{BASE_URL}/soloons"
     payload = {
         "row": int(row),
         "column": int(column),
         "color": color,
         "candidateId": CANDIDATE_ID
     }
-    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def create_cometh(row, column, direction):
@@ -40,14 +41,14 @@ def create_cometh(row, column, direction):
     :param direction: str, one of "up", "down", "right", "left"
     :return: dict or None, the API response
     """
-    url = f"{HOST}/comeths"
+    url = f"{BASE_URL}/comeths"
     payload = {
         "row": int(row),
         "column": int(column),
         "direction": direction,
         "candidateId": CANDIDATE_ID
     }
-    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def delete_polyanets(row, column):
@@ -65,7 +66,7 @@ def delete_polyanets(row, column):
     }
 
     try:
-        response = requests.delete(HOST + '/polyanets', json=payload, headers=HEADERS)
+        response = requests.delete(BASE_URL + '/polyanets', json=payload)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
@@ -82,12 +83,11 @@ def get_map_goal():
     Retrieves the goal map for your candidate using the Crossmint API.
     :return: dict, the response JSON or error info
     """
-    url = f"{HOST}/map/{CANDIDATE_ID}/goal"
+    url = f"{BASE_URL}/map/{CANDIDATE_ID}/goal"
     print('Fetching the map goal')
     result = request_with_retry(
         method='GET',
         url=url,
-        headers=HEADERS,
         retry_after_delay=RETRY_AFTER_DELAY
     )
     if result is None:
