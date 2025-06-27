@@ -1,6 +1,7 @@
 from services import get_map_goal, create_polyanet, create_soloon, create_cometh
 from utils import find_positions_np
 from throttle import send_requests_with_throttle
+from itertools import zip_longest
 
 
 def main():
@@ -17,18 +18,21 @@ def main():
         "RIGHT_COMETH": (create_cometh, ['right']),
     }
 
-    tasks = []
 
+    tasks_by_type = {}
     for target, (func, extra_args) in creation_map.items():
         positions = find_positions_np(map_data, target)
-        for pos in positions:
-            # Unpack position and combine with extra_args
-            args = tuple(pos) + tuple(extra_args)
-            print(func, 'func')
-            print(*args, 'args')
-            tasks.append((func, args))  # <-- Correct
+        tasks_by_type[target] = [
+            (func, tuple(pos) + tuple(extra_args)) for pos in positions
+        ]
 
-    send_requests_with_throttle(tasks, num_workers=2)
+    interleaved_tasks = []
+    for task_group in zip_longest(*tasks_by_type.values()):
+        for task in task_group:
+            if task is not None:
+                interleaved_tasks.append(task)
+
+    send_requests_with_throttle(interleaved_tasks, num_workers=2)
 
 
 if __name__ == '__main__':
