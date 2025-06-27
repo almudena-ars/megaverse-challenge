@@ -1,6 +1,6 @@
 import requests
 
-from api_calls import post_with_retry
+from api_calls import request_with_retry
 from constants import HOST, CANDIDATE_ID, HEADERS, RETRY_AFTER_DELAY
 
 
@@ -11,7 +11,7 @@ def create_polyanet(row, column):
         "column": int(column),
         "candidateId": CANDIDATE_ID
     }
-    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def create_soloon(row, column, color):
@@ -29,7 +29,7 @@ def create_soloon(row, column, color):
         "color": color,
         "candidateId": CANDIDATE_ID
     }
-    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def create_cometh(row, column, direction):
@@ -47,7 +47,7 @@ def create_cometh(row, column, direction):
         "direction": direction,
         "candidateId": CANDIDATE_ID
     }
-    return post_with_retry(url, payload, HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
+    return request_with_retry(method='POST', url=url, payload=payload, headers=HEADERS, retry_after_delay=RETRY_AFTER_DELAY)
 
 
 def delete_polyanets(row, column):
@@ -83,16 +83,14 @@ def get_map_goal():
     :return: dict, the response JSON or error info
     """
     url = f"{HOST}/map/{CANDIDATE_ID}/goal"
+    print('Fetching the map goal')
+    result = request_with_retry(
+        method='GET',
+        url=url,
+        headers=HEADERS,
+        retry_after_delay=RETRY_AFTER_DELAY
+    )
+    if result is None:
+        return {"error": "Unable to fetch the map goal after retries."}
+    return result
 
-    try:
-        print('Fetching the map goal')
-        response = requests.get(url, headers=HEADERS)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"Unable to fetch the map goal:", e)
-        else:
-            return {"error": "HTTP Error", "message": str(e)}
-    except requests.exceptions.RequestException as e:
-        return {"error": "Request Failed", "message": str(e)}
