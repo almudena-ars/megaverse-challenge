@@ -1,5 +1,4 @@
 import requests
-import time
 
 from api_calls import post_with_retry
 from constants import HOST, CANDIDATE_ID, HEADERS, RETRY_AFTER_DELAY

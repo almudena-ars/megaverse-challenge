@@ -2,7 +2,7 @@ import queue
 import threading
 import time
 
-MAX_REQUESTS_PER_SECOND = 2  # Adjust as needed
+from constants import MAX_REQUESTS_PER_SECOND
 
 
 def worker(q):
