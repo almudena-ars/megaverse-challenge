@@ -1,7 +1,8 @@
-from services import get_map_goal, create_polyanet, create_soloon, create_cometh
+from api.services import get_map_goal, create_polyanet, create_soloon, create_cometh
 from utils import find_positions_np
-from throttle import send_requests_with_throttle
-from itertools import zip_longest
+from core.throttle import send_requests_with_throttle
+from core.task_builder import build_tasks, interleave_tasks
+
 
 
 def main():
@@ -18,20 +19,8 @@ def main():
         "RIGHT_COMETH": (create_cometh, ['right']),
     }
 
-
-    tasks_by_type = {}
-    for target, (func, extra_args) in creation_map.items():
-        positions = find_positions_np(map_data, target)
-        tasks_by_type[target] = [
-            (func, tuple(pos) + tuple(extra_args)) for pos in positions
-        ]
-
-    interleaved_tasks = []
-    for task_group in zip_longest(*tasks_by_type.values()):
-        for task in task_group:
-            if task is not None:
-                interleaved_tasks.append(task)
-
+    tasks_by_type = build_tasks(map_data, creation_map, find_positions_np)
+    interleaved_tasks = interleave_tasks(tasks_by_type)
     send_requests_with_throttle(interleaved_tasks, num_workers=2)
 
 
