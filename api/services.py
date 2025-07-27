@@ -1,96 +1,74 @@
 # api/services.py
-import requests
-
 from api.api_calls import request_with_retry
-from utils.config_parser import BASE_URL, CANDIDATE_ID, RETRY_AFTER_DELAY
+
+class PlanetService:
+    def __init__(self, config):
+        self.config = config
+
+    def create_polyanet(self, row, column):
+        """
+       Creates a Polyanet at the specified row and column.
+       :param row: int or str, the row position
+       :param column: int or str, the column position
+       :return: Response, the API response from the POST request
+       """
+        url = f"{self.config.BASE_URL}/polyanets"
+        payload = {
+            "row": int(row),
+            "column": int(column),
+            "candidateId": self.config.CANDIDATE_ID
+        }
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
 
 
-def create_polyanet(row, column):
-    url = f"{BASE_URL}/polyanets"
-    payload = {
-        "row": int(row),
-        "column": int(column),
-        "candidateId": CANDIDATE_ID
-    }
-    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
+    def create_soloon(self, row, column, color):
+        """
+        Creates a Soloon at the specified row and column with the given color.
+        :param row: int, the row position
+        :param column: int, the column position
+        :param color: str, one of "blue", "red", "purple", "white"
+        :return: dict or None, the API response
+        """
+        url = f"{self.config.BASE_URL}/soloons"
+        payload = {
+            "row": int(row),
+            "column": int(column),
+            "color": color,
+            "candidateId": self.config.CANDIDATE_ID
+        }
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
 
 
-def create_soloon(row, column, color):
-    """
-    Creates a Soloon at the specified row and column with the given color.
-    :param row: int, the row position
-    :param column: int, the column position
-    :param color: str, one of "blue", "red", "purple", "white"
-    :return: dict or None, the API response
-    """
-    url = f"{BASE_URL}/soloons"
-    payload = {
-        "row": int(row),
-        "column": int(column),
-        "color": color,
-        "candidateId": CANDIDATE_ID
-    }
-    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
+    def create_cometh(self, row, column, direction):
+        """
+        Creates a Cometh at the specified row and column with the given direction.
+        :param row: int, the row position
+        :param column: int, the column position
+        :param direction: str, one of "up", "down", "right", "left"
+        :return: dict or None, the API response
+        """
+        url = f"{self.config.BASE_URL}/comeths"
+        payload = {
+            "row": int(row),
+            "column": int(column),
+            "direction": direction,
+            "candidateId": self.config.CANDIDATE_ID
+        }
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
 
 
-def create_cometh(row, column, direction):
-    """
-    Creates a Cometh at the specified row and column with the given direction.
-    :param row: int, the row position
-    :param column: int, the column position
-    :param direction: str, one of "up", "down", "right", "left"
-    :return: dict or None, the API response
-    """
-    url = f"{BASE_URL}/comeths"
-    payload = {
-        "row": int(row),
-        "column": int(column),
-        "direction": direction,
-        "candidateId": CANDIDATE_ID
-    }
-    return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=RETRY_AFTER_DELAY)
-
-
-def delete_polyanets(row, column):
-    """
-    Deletes a Polyanet at the specified row and column using the Crossmint API.
-    Handles various HTTP status codes and provides error messages.
-    :param row: int, the row position
-    :param column: int, the column position
-    :return: dict, the response JSON or error info
-    """
-    payload = {
-        "row": row,
-        "column": column,
-        "candidateId": CANDIDATE_ID
-    }
-
-    try:
-        response = requests.delete(BASE_URL + '/polyanets', json=payload)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"Unable to delete the polyanet at ({row}, {column}):", e)
-        else:
-            return {"error": "HTTP Error", "message": str(e)}
-    except requests.exceptions.RequestException as e:
-        return {"error": "Request Failed", "message": str(e)}
-
-
-def get_map_goal():
-    """
-    Retrieves the goal map for your candidate using the Crossmint API.
-    :return: dict, the response JSON or error info
-    """
-    url = f"{BASE_URL}/map/{CANDIDATE_ID}/goal"
-    print('Fetching the map goal')
-    result = request_with_retry(
-        method='GET',
-        url=url,
-        retry_after_delay=RETRY_AFTER_DELAY
-    )
-    if result is None:
-        return {"error": "Unable to fetch the map goal after retries."}
-    return result
-
+    def get_map_goal(self):
+        """
+        Retrieves the goal map for your candidate using the Crossmint API.
+        :return: dict, the response JSON or error info
+        """
+        url = f"{self.config.BASE_URL}/map/{self.config.CANDIDATE_ID}/goal"
+        print('Fetching the map goal')
+        result = request_with_retry(
+            method='GET',
+            url=url,
+            retry_after_delay=self.config.RETRY_AFTER_DELAY
+        )
+        if result is None:
+            return {"error": "Unable to fetch the map goal after retries."}
+        return result
