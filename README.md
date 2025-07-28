@@ -1,4 +1,4 @@
-# Metaverse-challenge
+# Megaverse-challenge
 
 
 ## Overview
