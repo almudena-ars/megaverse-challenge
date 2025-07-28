@@ -18,7 +18,7 @@ class PlanetService:
             "column": int(column),
             "candidateId": self.config.CANDIDATE_ID
         }
-        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY, row=row, column=column)
 
 
     def create_soloon(self, row, column, color):
@@ -36,7 +36,7 @@ class PlanetService:
             "color": color,
             "candidateId": self.config.CANDIDATE_ID
         }
-        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY,row=row, column=column)
 
 
     def create_cometh(self, row, column, direction):
@@ -54,7 +54,7 @@ class PlanetService:
             "direction": direction,
             "candidateId": self.config.CANDIDATE_ID
         }
-        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY)
+        return request_with_retry(method='POST', url=url, payload=payload, retry_after_delay=self.config.RETRY_AFTER_DELAY,row=row, column=column)
 
 
     def get_map_goal(self):
